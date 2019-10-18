@@ -1,7 +1,6 @@
 package com.steven.tmap.layer
 
 import android.graphics.*
-import android.support.annotation.ColorInt
 
 /**
  * @author Steven
@@ -11,10 +10,9 @@ import android.support.annotation.ColorInt
 class LocationLayer : BaseLayer() {
 
     init {
-        level = LEVAL_LOCATION
+        level = LEVEL_LOCATION
     }
 
-    @ColorInt
     var locationColor = Color.parseColor("#FF5495e6")
         set(value) {
             mPaint.color = value

@@ -14,7 +14,7 @@ abstract class BaseLayer {
     companion object {
         const val LEVEL_OUTLINE = 0
         const val LEVEL_MARKER = 1
-        const val LEVAL_LOCATION = 2
+        const val LEVEL_LOCATION = 2
     }
 
     var level: Int = LEVEL_OUTLINE
