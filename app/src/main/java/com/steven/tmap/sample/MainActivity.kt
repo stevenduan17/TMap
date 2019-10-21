@@ -5,7 +5,10 @@ import android.graphics.Color
 import android.graphics.Path
 import android.graphics.PointF
 import android.os.Bundle
+import android.os.Handler
 import android.support.v7.app.AppCompatActivity
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import com.steven.tmap.layer.LocationLayer
 import com.steven.tmap.layer.MarkerLayer
@@ -52,16 +55,52 @@ class MainActivity : AppCompatActivity(), OnMarkerCheckedListener {
         tMap.addLayer(markerLayer)
 
 
-        tMap.addLayer(LocationLayer().apply {
+        val locationLayer = LocationLayer().apply {
             locationRadius = toPx(6)
-            setCurrentLocation(PointF(130F, 200F))
-        })
+            navigateLine = list.reversed()
+//            setCurrentLocation(PointF(280F, 380F))
+        }
+        tMap.addLayer(locationLayer)
+
+        val locations = listOf(
+            PointF(190f, 600f),
+            PointF(290f, 400f),
+            PointF(260f, 350f),
+            PointF(80f, 20f),
+            PointF(10f, 40f),
+            PointF(0f, 0f)
+        )
+
+        val handler = Handler()
+        var i = 0
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                locationLayer.setCurrentLocation(locations[i])
+                if (i == locations.size - 1) {
+                    handler.removeCallbacks(this)
+                } else {
+                    i++
+                }
+                handler.postDelayed(this, 3000L)
+            }
+        }, 3000L)
+
     }
 
     override fun onMarkerChecked(marker: Marker) {
         Toast.makeText(this, marker.toString(), Toast.LENGTH_SHORT).show()
     }
 
-   @Suppress("SameParameterValue")
-   private fun toPx(dp: Int) = dp * resources.displayMetrics.density + 0.5F
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (item?.itemId == R.id.scale) tMap.setCurrentZoom(1.5F)
+        return super.onOptionsItemSelected(item)
+    }
+
+    @Suppress("SameParameterValue")
+    private fun toPx(dp: Int) = dp * resources.displayMetrics.density + 0.5F
 }

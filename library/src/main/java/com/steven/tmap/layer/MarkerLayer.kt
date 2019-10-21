@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.os.Handler
 import android.os.Looper
 import com.steven.tmap.IO
+import com.steven.tmap.MAIN
 import com.steven.tmap.marker.Marker
 import com.steven.tmap.marker.OnMarkerCheckedListener
 import com.steven.tmap.getDistance
@@ -27,7 +28,6 @@ class MarkerLayer(private val activeIcon: Bitmap) : BaseLayer() {
     private var mMarkers: MutableList<Marker>? = null
     private var mActiveRadius = 20F
     private var mActiveMarker: Marker? = null
-    private val mHandler by lazy { Handler(Looper.getMainLooper()) }
     private val mPaint by lazy {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.FILL_AND_STROKE
@@ -70,7 +70,7 @@ class MarkerLayer(private val activeIcon: Bitmap) : BaseLayer() {
                     val distance = getDistance(point, position)
                     if (distance <= mActiveRadius) {
                         this.mActiveMarker = marker
-                        mHandler.post {
+                        MAIN.post {
                             onActionListener?.onPostRefresh()
                             onMarkerCheckedListener?.onMarkerChecked(marker)
                         }

@@ -1,6 +1,8 @@
 package com.steven.tmap
 
 import android.graphics.PointF
+import android.os.Handler
+import android.os.Looper
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.math.pow
@@ -11,6 +13,8 @@ import kotlin.math.sqrt
  * @version 1.0
  * @since 2019/10/16
  */
+
+val MAIN by lazy { Handler(Looper.getMainLooper()) }
 
 val IO: ExecutorService by lazy { Executors.newSingleThreadExecutor() }
 

@@ -1,6 +1,9 @@
 package com.steven.tmap.layer
 
 import android.graphics.*
+import com.steven.tmap.IO
+import com.steven.tmap.MAIN
+import com.steven.tmap.getDistance
 
 /**
  * @author Steven
@@ -19,6 +22,8 @@ class LocationLayer : BaseLayer() {
             field = value
         }
     var locationRadius = 12F
+    //navigate line for whole map direct.
+    var navigateLine: List<PointF>? = null
 
     private val mPaint by lazy {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -44,10 +49,35 @@ class LocationLayer : BaseLayer() {
 
     override fun onTouch(point: FloatArray, matrix: Matrix) {}
 
+    fun getCurrentLocation(): PointF? = currentLocation
+
     fun setCurrentLocation(location: PointF) {
         this.currentLocation = location
+        getNavigationPoints(location)
         onActionListener?.onPostRefresh()
     }
 
-    fun getCurrentLocation(): PointF? = currentLocation
+    private fun getNavigationPoints(location: PointF) {
+        if (navigateLine.isNullOrEmpty() || navigateLine?.size ?: 0 < 2) return
+        IO.execute {
+            var minDistance = getDistance(location, navigateLine!![0])
+            var minIndex = 0
+            for (i in 1 until navigateLine!!.size) {
+                val d = getDistance(location, navigateLine!![i])
+                if (d < minDistance) {
+                    minIndex = i
+                    minDistance = d
+                }
+            }
+            if (minIndex + 1 > navigateLine!!.size - 1) return@execute
+            if (minDistance < 100F) {
+                MAIN.post {
+                    onActionListener?.onRotateRequired(
+                        navigateLine!![minIndex],
+                        navigateLine!![minIndex + 1]
+                    )
+                }
+            }
+        }
+    }
 }

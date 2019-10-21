@@ -5,14 +5,13 @@ import android.content.Context
 import android.graphics.Matrix
 import android.graphics.PointF
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.steven.tmap.layer.BaseLayer
 import com.steven.tmap.layer.OutlineLayer
-import kotlin.math.atan2
-import kotlin.math.pow
-import kotlin.math.sqrt
+import kotlin.math.*
 
 /**
  * @author Steven
@@ -39,7 +38,7 @@ class TMap @JvmOverloads constructor(
     private val TAG = "TMAP"
     private var isOutlineLoad = false
     private var mLayers: MutableList<BaseLayer>
-    private val currentMatrix =  Matrix()
+    private val currentMatrix = Matrix()
     private var currentZoom = 1F
     private var currentRotate = 0F
     private var outlineLayer: OutlineLayer? = null
@@ -154,6 +153,18 @@ class TMap @JvmOverloads constructor(
 
     override fun onPostRefresh() = draw()
 
+    override fun onRotateRequired(p1: PointF, p2: PointF) {
+        val start = floatArrayOf(p1.x, p1.y)
+        val end = floatArrayOf(p2.x, p2.y)
+        currentMatrix.mapPoints(start)
+        currentMatrix.mapPoints(end)
+
+        val degree = Math.toDegrees(
+            atan2((start[0] - end[0]).toDouble(), (start[1] - end[1]).toDouble())
+        )
+        rotate(degree.toFloat())
+    }
+
     private fun getRotate(event: MotionEvent, p: PointF) = Math.toDegrees(
         atan2((event.y - p.y).toDouble(), (event.x - p.x).toDouble())
     ).toFloat()
@@ -207,10 +218,12 @@ class TMap @JvmOverloads constructor(
             if (vertical) {
                 dy = (this.surfaceHeight - oHeight) / 2 - scope.top
             }
-
-            //TODO  暂时不缩放 不旋转
-
             currentMatrix.postTranslate(dx, dy)
+
+            if (surfaceHeight != 0 || surfaceWidth != 0) {
+                val scale = min(surfaceHeight / scope.height(), surfaceWidth / scope.width())
+                currentMatrix.postScale(scale, scale, surfaceWidth / 2F, surfaceHeight / 2F)
+            }
         }
         draw()
     }
@@ -242,11 +255,19 @@ class TMap @JvmOverloads constructor(
         val z = zoom / currentZoom
         currentMatrix.postScale(z, z, centerX, centerY)
         currentZoom = zoom
+        draw()
     }
 
     fun getCurrentZoom() = this.currentZoom
 
-    fun setCurrentRotate(
+    fun rotate(degree: Float) {
+        currentMatrix.postRotate(degree, surfaceWidth / 2F, surfaceHeight / 2F)
+        currentRotate = (currentRotate + degree) % 360
+        if (currentRotate < 0) currentRotate += 360F
+        draw()
+    }
+
+    fun setExactlyRotate(
         rotateDegree: Float,
         centerX: Float = surfaceWidth / 2F,
         centerY: Float = surfaceHeight / 2F
@@ -254,12 +275,14 @@ class TMap @JvmOverloads constructor(
         currentMatrix.postRotate(rotateDegree - currentRotate, centerX, centerY)
         currentRotate = rotateDegree % 360
         if (currentRotate < 0) currentRotate += 360F
+        draw()
     }
 
     fun getCurrentRotate() = this.currentRotate
 
     fun translate(x: Float, y: Float) {
         this.currentMatrix.postTranslate(x, y)
+        draw()
     }
 
     /**
