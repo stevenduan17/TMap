@@ -153,7 +153,8 @@ class TMap @JvmOverloads constructor(
 
     override fun onPostRefresh() = draw()
 
-    override fun onRotateRequired(p1: PointF, p2: PointF) {
+    override fun onRotateRequired(p1: PointF, p2: PointF, centerToPoint: PointF?) {
+        centerToPoint?.let { centerToPoint(floatArrayOf(it.x, it.y)) }
         val start = floatArrayOf(p1.x, p1.y)
         val end = floatArrayOf(p2.x, p2.y)
         currentMatrix.mapPoints(start)

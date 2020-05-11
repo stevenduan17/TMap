@@ -22,6 +22,7 @@ class LocationLayer : BaseLayer() {
             field = value
         }
     var locationRadius = 12F
+
     //navigate line for whole map direct.
     var navigateLine: List<PointF>? = null
 
@@ -51,13 +52,13 @@ class LocationLayer : BaseLayer() {
 
     fun getCurrentLocation(): PointF? = currentLocation
 
-    fun setCurrentLocation(location: PointF) {
+    fun setCurrentLocation(location: PointF, centerToLocation: Boolean = false) {
         this.currentLocation = location
-        getNavigationPoints(location)
+        getNavigationPoints(location, centerToLocation)
         onActionListener?.onPostRefresh()
     }
 
-    private fun getNavigationPoints(location: PointF) {
+    private fun getNavigationPoints(location: PointF, centerToLocation: Boolean = false) {
         if (navigateLine.isNullOrEmpty() || navigateLine?.size ?: 0 < 2) return
         IO.execute {
             var minDistance = getDistance(location, navigateLine!![0])
@@ -74,7 +75,8 @@ class LocationLayer : BaseLayer() {
                 MAIN.post {
                     onActionListener?.onRotateRequired(
                         navigateLine!![minIndex],
-                        navigateLine!![minIndex + 1]
+                        navigateLine!![minIndex + 1],
+                        if (centerToLocation) location else null
                     )
                 }
             }

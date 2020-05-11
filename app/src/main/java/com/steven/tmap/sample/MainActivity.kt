@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity(), OnMarkerCheckedListener {
         var i = 0
         handler.postDelayed(object : Runnable {
             override fun run() {
-                locationLayer.setCurrentLocation(locations[i])
+                locationLayer.setCurrentLocation(locations[i],true)
                 if (i == locations.size - 1) {
                     handler.removeCallbacks(this)
                 } else {

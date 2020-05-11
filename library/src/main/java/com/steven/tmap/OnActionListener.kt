@@ -11,5 +11,5 @@ interface OnActionListener {
 
     fun onPostRefresh()
 
-    fun onRotateRequired(p1: PointF, p2: PointF)
+    fun onRotateRequired(p1: PointF, p2: PointF, centerToPoint: PointF? = null)
 }
