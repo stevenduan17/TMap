@@ -4,4 +4,7 @@
     <item
         android:id="@+id/scale"
         android:title="Scale" />
+
+    <item android:id="@+id/nav"
+        android:title="导航地图"/>
 </menu>

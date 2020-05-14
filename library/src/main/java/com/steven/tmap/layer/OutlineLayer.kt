@@ -9,25 +9,25 @@ import android.graphics.*
  */
 class OutlineLayer : BaseLayer() {
 
-    private var mPath: Path? = null
+    private var mPaths: MutableList<Path>? = null
     private val mPaint by lazy { Paint(Paint.ANTI_ALIAS_FLAG) }
 
     override fun draw(canvas: Canvas, matrix: Matrix, zoom: Float, rotate: Float) {
-        mPath?.let {
-            if (visable) {
-                canvas.save()
-                canvas.matrix = matrix
+        if (visable) {
+            canvas.save()
+            canvas.matrix = matrix
+            mPaths?.forEach {
                 canvas.drawPath(it, mPaint)
-                canvas.restore()
             }
+            canvas.restore()
         }
     }
 
     override fun onTouch(point: FloatArray, matrix: Matrix) {
     }
 
-    fun setOutline(path: Path, color: Int, width: Float) {
-        this.mPath = path
+    fun setOutline(paths: MutableList<Path>, color: Int, width: Float) {
+        this.mPaths = paths
         this.mPaint.apply {
             setColor(color)
             strokeWidth = width
@@ -39,6 +39,6 @@ class OutlineLayer : BaseLayer() {
      * Get initial scope.
      */
     fun getInitialScope(): RectF {
-        return RectF(0f, 0f, 300f, 600f)
+        return RectF(45f, 21f, 668f, 819f)
     }
 }

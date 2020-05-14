@@ -1,5 +1,6 @@
 package com.steven.tmap.sample
 
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Path
@@ -32,11 +33,11 @@ class MainActivity : AppCompatActivity(), OnMarkerCheckedListener {
         )
 
         tMap.addLayer(OutlineLayer().apply {
-            setOutline(Path().apply {
+            setOutline(mutableListOf(Path().apply {
                 for (p in list) {
                     lineTo(p.x, p.y)
                 }
-            }, Color.BLUE, 2F)
+            }), Color.BLUE, 2F)
         })
 
         val markerActive = BitmapFactory.decodeResource(resources, R.drawable.marker_active)
@@ -75,7 +76,7 @@ class MainActivity : AppCompatActivity(), OnMarkerCheckedListener {
         var i = 0
         handler.postDelayed(object : Runnable {
             override fun run() {
-                locationLayer.setCurrentLocation(locations[i],true)
+                locationLayer.setCurrentLocation(locations[i], true)
                 if (i == locations.size - 1) {
                     handler.removeCallbacks(this)
                 } else {
@@ -97,7 +98,11 @@ class MainActivity : AppCompatActivity(), OnMarkerCheckedListener {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        if (item?.itemId == R.id.scale) tMap.setCurrentZoom(1.5F)
+        if (item?.itemId == R.id.scale) {
+            tMap.setCurrentZoom(1.5F)
+        } else if (item?.itemId == R.id.nav) {
+            startActivity(Intent(applicationContext, NavActivity::class.java))
+        }
         return super.onOptionsItemSelected(item)
     }
 

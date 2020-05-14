@@ -4,13 +4,11 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
-import android.os.Handler
-import android.os.Looper
 import com.steven.tmap.IO
 import com.steven.tmap.MAIN
+import com.steven.tmap.getDistance
 import com.steven.tmap.marker.Marker
 import com.steven.tmap.marker.OnMarkerCheckedListener
-import com.steven.tmap.getDistance
 
 /**
  * @author Steven
