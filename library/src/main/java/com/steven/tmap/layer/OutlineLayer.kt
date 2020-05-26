@@ -12,6 +12,8 @@ class OutlineLayer : BaseLayer() {
     private var mPaths: MutableList<Path>? = null
     private val mPaint by lazy { Paint(Paint.ANTI_ALIAS_FLAG) }
 
+    var onClick: ((screenPoint: FloatArray) -> Unit)? = null
+
     override fun draw(canvas: Canvas, matrix: Matrix, zoom: Float, rotate: Float) {
         if (visable) {
             canvas.save()
@@ -24,6 +26,7 @@ class OutlineLayer : BaseLayer() {
     }
 
     override fun onTouch(point: FloatArray, matrix: Matrix) {
+        onClick?.invoke(point)
     }
 
     fun setOutline(paths: MutableList<Path>, color: Int, width: Float) {

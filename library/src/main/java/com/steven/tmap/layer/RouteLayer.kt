@@ -12,9 +12,9 @@ import android.graphics.*
 class RouteLayer(
     private var mPath: Path,
     private val startIcon: Bitmap,
-    private val startPosition: PointF,
+    private var startPosition: PointF,
     private val endIcon: Bitmap,
-    private val endPosition: PointF
+    private var endPosition: PointF
 ) : BaseLayer() {
 
     init {
@@ -52,5 +52,12 @@ class RouteLayer(
     }
 
     override fun onTouch(point: FloatArray, matrix: Matrix) {
+    }
+
+    fun changePath(startPosition: PointF, endPosition: PointF, path: Path) {
+        this.mPath = path
+        this.startPosition = startPosition
+        this.endPosition = endPosition
+        onActionListener?.onPostRefresh()
     }
 }

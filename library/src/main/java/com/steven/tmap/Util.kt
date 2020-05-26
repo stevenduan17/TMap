@@ -1,5 +1,6 @@
 package com.steven.tmap
 
+import android.graphics.Path
 import android.graphics.PointF
 import android.os.Handler
 import android.os.Looper
@@ -96,6 +97,28 @@ fun getDistanceFromPointToLine(p: PointF, linePoint1: PointF, linePoint2: PointF
     }
 }
 
+fun getShortestDistanceFromPointToLine(p: PointF, a: PointF, b: PointF): DistanceResult {
+    val ap = PointF(p.x - a.x, p.y - a.y)
+    val ab = PointF(b.x - a.x, b.y - a.y)
+    val bp = PointF(p.x - b.x, p.y - b.y)
+
+    val r = (ap.x * ab.x + ap.y * ab.y) / (ab.x.pow(2) + ab.y.pow(2))
+
+    if (r <= 0) return DistanceResult(sqrt(ap.x.pow(2) + ap.y.pow(2)), isA = true)
+    if (r >= 1) return DistanceResult(sqrt(bp.x.pow(2) + bp.y.pow(2)), isB = true)
+
+    val px = a.x + ab.x * r
+    val py = a.y + ab.y * r
+
+    return DistanceResult(sqrt((p.x - px).pow(2) + (p.y - py).pow(2)))
+}
+
+data class DistanceResult(
+    val distance: Float,
+    val isA: Boolean = false,
+    val isB: Boolean = false
+)
+
 fun getIntersectionFromPointToLine(p: PointF, linePoint1: PointF, linePoint2: PointF): PointF {
     val x: Float
     val y: Float
@@ -125,3 +148,36 @@ fun isObtuseAnglePointAndLine(point: PointF, linePoint1: PointF, linePoint2: Poi
     val c = getDistance(linePoint1, linePoint2)
     return a.pow(2) + c.pow(2) < b.pow(2) || b.pow(2) + c.pow(2) < a.pow(2)
 }
+
+/**
+ * 判断点是否在多边形内
+ */
+fun isPointInPolygon(point: PointF, polygon: List<PointF>): Boolean {
+    if (polygon.size < 3) return false
+    var sum = 0
+    var x1: Float
+    var y1: Float
+    var x2: Float
+    var y2: Float
+    var dx: Float
+    for ((i, v) in polygon.withIndex()) {
+        x1 = v.x
+        y1 = v.y
+        if (i == polygon.size - 1) {
+            x2 = polygon[0].x
+            y2 = polygon[0].y
+        } else {
+            x2 = polygon[i + 1].x
+            y2 = polygon[i + 1].y
+        }
+        if ((point.y >= y1 && point.y < y2) || (point.y >= y2 && point.y < y1)) {
+            if (abs(y1 - y2) > 0) {
+                dx = x1 - ((x1 - x2) * (y1 - point.y) / (y1 - y2))
+                if (dx < point.x) sum++
+            }
+        }
+    }
+    return sum % 2 != 0
+}
+
+

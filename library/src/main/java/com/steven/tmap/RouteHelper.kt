@@ -1,10 +1,12 @@
 package com.steven.tmap
 
+import android.graphics.Path
 import android.graphics.Point
 import android.graphics.PointF
 import com.steven.tmap.algorithm.getBestPathByGenetic
 import com.steven.tmap.algorithm.getShortestPath
 import java.util.*
+import kotlin.math.pow
 
 /**
  * @author Steven
@@ -153,23 +155,114 @@ object RouteHelper {
             var pos1 = 0
             var pos2 = 0
             var min = Float.MAX_VALUE
+            var nodesPointIndex: Int? = null
             for (i in 0 until topology.size - 1) {
                 val p1 = nodes[topology[i].x]
                 val p2 = nodes[topology[i].y]
-                if (!isObtuseAnglePointAndLine(point, p1, p2)) {
-                    val minDis = getDistanceFromPointToLine(point, p1, p2)
-                    if (min > minDis) {
-                        p = getIntersectionFromPointToLine(point, p1, p2)
-                        min = minDis
-                        pos1 = topology[i].x
-                        pos2 = topology[i].y
+
+                val result = getShortestDistanceFromPointToLine(point, p1, p2)
+                if (result.distance < min) {
+                    min = result.distance
+                    when {
+                        result.isA -> {
+                            nodesPointIndex = topology[i].x
+                            p = null
+                        }
+                        result.isB -> {
+                            nodesPointIndex = topology[i].y
+                            p = null
+                        }
+                        else -> {
+                            // get intersection
+                            p = getIntersectionFromPointToLine(point, p1, p2)
+                            pos1 = topology[i].x
+                            pos2 = topology[i].y
+                            nodesPointIndex = null
+                        }
                     }
                 }
             }
-            // get intersection
-            nodes.add(p!!)
-            topology.add(Point(pos1, nodes.size - 1))
-            topology.add(Point(pos2, nodes.size - 1))
+
+            p?.let {
+                nodes.add(it)
+                topology.add(Point(pos1, nodes.size - 1))
+                topology.add(Point(pos2, nodes.size - 1))
+            }
+
+            nodesPointIndex?.let {
+                nodes.add(point)
+                topology.add(Point(it, nodes.size - 1))
+            }
+        }
+    }
+
+    //TODO  some problems.
+    fun getNavigationRoute(origin: List<PointF>, currentLocation: PointF): Pair<Path, PointF>? {
+        if (origin.isEmpty() || origin.size < 2) return null
+        var minIndex = 0
+        var minDistance = Float.MAX_VALUE
+        var distance: Float
+        origin.forEachIndexed { index, point ->
+            distance = getDistance(point, currentLocation)
+            if (distance < minDistance) {
+                minDistance = distance
+                minIndex = index
+            }
+        }
+        //verify end.
+        if (minIndex < origin.size - 1) {
+            val isObtuseToNext = minDistance.pow(2) +
+                    getDistance(origin[minIndex], origin[minIndex + 1]).pow(2) <
+                    getDistance(currentLocation, origin[minIndex + 1]).pow(2)
+            if (isObtuseToNext) {
+                //is obtuse, currentPosition in minIndex-1 to minIndex
+                if (minIndex == 0) {
+                    return Pair(Path().apply {
+                        moveTo(origin[0].x, origin[0].y)
+                        for (i in 1 until origin.size) {
+                            lineTo(origin[i].x, origin[i].y)
+                        }
+                    }, origin[0])
+                } else {
+                    val intersection = getIntersectionFromPointToLine(
+                        currentLocation, origin[minIndex - 1], origin[minIndex]
+                    )
+                    return Pair(
+                        Path().apply {
+                            moveTo(intersection.x, intersection.y)
+                            for (i in minIndex until origin.size) {
+                                lineTo(origin[minIndex].x, origin[minIndex].y)
+                            }
+                        }, intersection
+                    )
+                }
+            } else {
+                val intersection = getIntersectionFromPointToLine(
+                    currentLocation, origin[minIndex + 1], origin[minIndex]
+                )
+                return Pair(Path().apply {
+                    moveTo(intersection.x, intersection.y)
+                    for (i in minIndex + 1 until origin.size) {
+                        lineTo(origin[minIndex].x, origin[minIndex].y)
+                    }
+                }, intersection)
+            }
+        } else {
+            val isObtuseToEnd = minDistance.pow(2) +
+                    getDistance(origin[minIndex], origin[minIndex - 1]).pow(2) <=
+                    getDistance(currentLocation, origin[minIndex - 1]).pow(2)
+            return if (isObtuseToEnd) {
+                //already to the end
+                null
+            } else {
+                val intersection = getIntersectionFromPointToLine(
+                    currentLocation, origin[minIndex], origin[minIndex - 1]
+                )
+                Pair(Path().apply {
+                    moveTo(intersection.x, intersection.y)
+                    lineTo(origin[minIndex].x, origin[minIndex].y)
+                }, intersection)
+            }
         }
     }
 
