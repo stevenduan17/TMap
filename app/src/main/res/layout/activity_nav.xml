@@ -10,10 +10,13 @@
 
     <TextView
         android:id="@+id/descTextView"
+        style="@style/TextAppearance.AppCompat.Subhead"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:background="@android:color/white"
-        android:padding="16dp" />
+        android:padding="16dp"
+        android:textColor="@color/colorPrimary" />
 
 </FrameLayout>
 

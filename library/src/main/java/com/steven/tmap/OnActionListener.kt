@@ -11,5 +11,8 @@ interface OnActionListener {
 
     fun onPostRefresh()
 
-    fun onRotateRequired(p1: PointF, p2: PointF, centerToPoint: PointF? = null)
+    fun onRotateRequired(
+        p1: PointF, p2: PointF, centerToPoint: PointF? = null,
+        rotateCallback: ((degree: Double) -> Unit)? = null
+    )
 }

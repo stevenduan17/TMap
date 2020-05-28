@@ -153,7 +153,12 @@ class TMap @JvmOverloads constructor(
 
     override fun onPostRefresh() = draw()
 
-    override fun onRotateRequired(p1: PointF, p2: PointF, centerToPoint: PointF?) {
+    override fun onRotateRequired(
+        p1: PointF,
+        p2: PointF,
+        centerToPoint: PointF?,
+        rotateCallback: ((degree: Double) -> Unit)?
+    ) {
         centerToPoint?.let { centerToPoint(floatArrayOf(it.x, it.y)) }
         val start = floatArrayOf(p1.x, p1.y)
         val end = floatArrayOf(p2.x, p2.y)
@@ -164,6 +169,7 @@ class TMap @JvmOverloads constructor(
             atan2((start[0] - end[0]).toDouble(), (start[1] - end[1]).toDouble())
         )
         rotate(degree.toFloat())
+        rotateCallback?.invoke(degree)
     }
 
     private fun getRotate(event: MotionEvent, p: PointF) = Math.toDegrees(

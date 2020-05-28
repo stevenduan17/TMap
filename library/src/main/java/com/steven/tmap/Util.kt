@@ -1,6 +1,7 @@
 package com.steven.tmap
 
 import android.graphics.Path
+import android.graphics.Point
 import android.graphics.PointF
 import android.os.Handler
 import android.os.Looper
@@ -25,6 +26,16 @@ fun getDistance(p1: PointF, p2: PointF) = sqrt(
 fun getDistance(p1: FloatArray, p2: FloatArray) = sqrt(
     (p1[0] - p2[0]).toDouble().pow(2.0) + (p1[1] - p2[1]).toDouble().pow(2.0)
 ).toFloat()
+
+fun getDistance(points: List<PointF>): Float {
+    var distance = 0f
+    points.forEachIndexed { index, point ->
+        if (index != points.size - 1) {
+            distance += getDistance(point, points[index + 1])
+        }
+    }
+    return distance
+}
 
 fun getDistance(x1: Float, y1: Float, x2: Float, y2: Float) = sqrt(
     (x1 - x2).toDouble().pow(2.0) + (y1 - y2).toDouble().pow(2.0)
@@ -142,6 +153,16 @@ fun getIntersectionFromPointToLine(p: PointF, linePoint1: PointF, linePoint2: Po
     return PointF(x, y)
 }
 
+fun getShortestIntersectionFromPointToLine(p: PointF, f: PointF, s: PointF): PointF {
+    val d1 = getDistance(p, f)
+    val d2 = getDistance(p, s)
+    val d3 = getDistance(f, s)
+
+    if (d1.pow(2) + d3.pow(2) < d2.pow(2)) return f
+    if (d2.pow(2) + d3.pow(2) < d1.pow(2)) return s
+    return getIntersectionFromPointToLine(p, f, s)
+}
+
 fun isObtuseAnglePointAndLine(point: PointF, linePoint1: PointF, linePoint2: PointF): Boolean {
     val a = getDistance(point, linePoint1)
     val b = getDistance(point, linePoint2)
@@ -178,6 +199,15 @@ fun isPointInPolygon(point: PointF, polygon: List<PointF>): Boolean {
         }
     }
     return sum % 2 != 0
+}
+
+fun getPath(points: List<PointF>): Path = Path().apply {
+    if (points.isNotEmpty()) {
+        moveTo(points.first().x, points.first().y)
+        points.forEach {
+            lineTo(it.x, it.y)
+        }
+    }
 }
 
 

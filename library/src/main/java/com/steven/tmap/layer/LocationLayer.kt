@@ -52,13 +52,21 @@ class LocationLayer : BaseLayer() {
 
     fun getCurrentLocation(): PointF? = currentLocation
 
-    fun setCurrentLocation(location: PointF, centerToLocation: Boolean = false) {
+    fun setCurrentLocation(
+        location: PointF,
+        centerToLocation: Boolean = false,
+        rotateCallback: ((degree: Double) -> Unit)? = null
+    ) {
         this.currentLocation = location
-        getNavigationPoints(location, centerToLocation)
+        getNavigationPoints(location, centerToLocation, rotateCallback)
         onActionListener?.onPostRefresh()
     }
 
-    private fun getNavigationPoints(location: PointF, centerToLocation: Boolean = false) {
+    private fun getNavigationPoints(
+        location: PointF,
+        centerToLocation: Boolean = false,
+        rotateCallback: ((degree: Double) -> Unit)?
+    ) {
         if (navigateLine.isNullOrEmpty() || navigateLine?.size ?: 0 < 2) return
         IO.execute {
             var minDistance = getDistance(location, navigateLine!![0])
@@ -76,7 +84,8 @@ class LocationLayer : BaseLayer() {
                     onActionListener?.onRotateRequired(
                         navigateLine!![minIndex],
                         navigateLine!![minIndex + 1],
-                        if (centerToLocation) location else null
+                        if (centerToLocation) location else null,
+                        rotateCallback
                     )
                 }
             }

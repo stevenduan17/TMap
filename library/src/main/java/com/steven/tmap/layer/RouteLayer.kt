@@ -10,21 +10,17 @@ import android.graphics.*
  * @since 2020/5/13
  */
 class RouteLayer(
-    private var mPath: Path,
-    private val startIcon: Bitmap,
-    private var startPosition: PointF,
-    private val endIcon: Bitmap,
-    private var endPosition: PointF
+    private var mPaths: HashMap<Path, Int>?,
+    private var startIcon: Pair<Bitmap, PointF>? = null,
+    private var endIcon: Pair<Bitmap, PointF>? = null
 ) : BaseLayer() {
 
     init {
         level = LEVEL_ROUTE
     }
 
-
     private val mPaint by lazy {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#2DB7A2")
             strokeWidth = 6f
             style = Paint.Style.STROKE
         }
@@ -37,27 +33,46 @@ class RouteLayer(
         if (!visable) return
         canvas.save()
         canvas.matrix = matrix
-        canvas.drawBitmap(
-            startIcon, startPosition.x - startIcon.width / 2F,
-            startPosition.y - startIcon.height / 2F,
-            mIconPaint
-        )
-        canvas.drawPath(mPath, mPaint)
-        canvas.drawBitmap(
-            endIcon, endPosition.x - endIcon.width / 2F,
-            endPosition.y - endIcon.height / 2F,
-            mIconPaint
-        )
+        startIcon?.let {
+            canvas.drawBitmap(
+                it.first, it.second.x - it.first.width / 2F,
+                it.second.y - it.first.height / 2F,
+                mIconPaint
+            )
+        }
+        mPaths?.keys?.forEach {
+            mPaths?.get(it)?.let { color -> mPaint.color = color }
+            canvas.drawPath(it, mPaint)
+        }
+        endIcon?.let {
+            canvas.drawBitmap(
+                it.first, it.second.x - it.first.width / 2F,
+                it.second.y - it.first.height / 2F,
+                mIconPaint
+            )
+        }
         canvas.restore()
     }
 
     override fun onTouch(point: FloatArray, matrix: Matrix) {
     }
 
-    fun changePath(startPosition: PointF, endPosition: PointF, path: Path) {
-        this.mPath = path
-        this.startPosition = startPosition
-        this.endPosition = endPosition
+    fun updatePaths(
+        paths: HashMap<Path, Int>,
+        ignoreEnds: Boolean = false,
+        startIcon: Pair<Bitmap, PointF>? = null,
+        endIcon: Pair<Bitmap, PointF>? = null
+    ) {
+        this.mPaths = paths
+        if (!ignoreEnds) {
+            this.startIcon = startIcon
+            this.endIcon = endIcon
+        }
+        onActionListener?.onPostRefresh()
+    }
+
+    fun clearPaths() {
+        this.mPaths = null
         onActionListener?.onPostRefresh()
     }
 }

@@ -22,9 +22,9 @@ fun getIntercptedRoute(list: List<PointF>): List<PointF> {
 }
 
 fun insert(p1: PointF, p2: PointF, result: MutableList<PointF>) {
-    val center = getMiddlePoint(p1,p2)
-    val c1 = getMiddlePoint(p1,center)
-    val c2 = getMiddlePoint(center,p2)
+    val center = getMiddlePoint(p1, p2)
+    val c1 = getMiddlePoint(p1, center)
+    val c2 = getMiddlePoint(center, p2)
     result.add(p1)
     result.add(c1)
     result.add(center)
